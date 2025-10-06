@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if task %}Edit Task{% else %}Create New Task{% endif %} - Task Manager</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 2rem 0;
+        }
+        
+        .form-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border: none;
+            overflow: hidden;
+        }
+        
+        .form-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin: -1.5rem -1.5rem 2rem -1.5rem;
+        }
+        
+        .form-header h1 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.8rem;
+        }
+        
+        .form-header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-custom {
+            border-radius: 8px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .form-check-input:checked {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        
+        .form-check-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .back-link {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            color: #6c757d;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .back-link:hover {
+            color: #495057;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0;
+            }
+            
+            .form-header {
+                padding: 1.5rem;
+                margin: -1rem -1rem 1.5rem -1rem;
+            }
+            
+            .form-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .btn-custom {
+                padding: 0.6rem 1.5rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Back to List Link -->
+    <a href="{% url 'task_list' %}" class="back-link">
+        <i class="bi bi-arrow-left me-2"></i>
+        Back to Tasks
+    </a>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8 col-sm-10">
+                <div class="card form-card">
+                    <div class="card-body p-4">
+                        <!-- Form Header -->
+                        <div class="form-header">
+                            <h1>
+                                <i class="bi bi-{% if task %}pencil-square{% else %}plus-circle{% endif %} me-2"></i>
+                                {% if task %}Edit Task{% else %}Add a New Task{% endif %}
+                            </h1>
+                            <p>
+                                {% if task %}
+                                    Update your task details below
+                                {% else %}
+                                    Fill in the details to create a new task
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <!-- Task Form -->
+                        <form method="POST" novalidate>
+                            {% csrf_token %}
+                            
+                            <!-- Task Title Field -->
+                            <div class="mb-4">
+                                <label for="title" class="form-label">
+                                    <i class="bi bi-card-text me-2"></i>
+                                    Task Title *
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="title" 
+                                       name="title" 
+                                       placeholder="Enter task title..."
+                                       value="{% if task %}{{ task.title }}{% endif %}"
+                                       required>
+                                <div class="form-text">
+                                    Choose a clear and descriptive title for your task
+                                </div>
+                            </div>
+
+                            <!-- Description Field -->
+                            <div class="mb-4">
+                                <label for="description" class="form-label">
+                                    <i class="bi bi-file-text me-2"></i>
+                                    Description
+                                </label>
+                                <textarea class="form-control" 
+                                          id="description" 
+                                          name="description" 
+                                          rows="4" 
+                                          placeholder="Enter task description...">{% if task %}{{ task.description }}{% endif %}</textarea>
+                                <div class="form-text">
+                                    Provide additional details about the task (optional)
+                                </div>
+                            </div>
+
+                            <!-- Status Field (only show for editing) -->
+                            {% if task %}
+                            <div class="mb-4">
+                                <label for="status" class="form-label">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    Status
+                                </label>
+                                <select class="form-select" id="status" name="completed">
+                                    <option value="0" {% if not task.completed %}selected{% endif %}>
+                                        <i class="bi bi-clock"></i> Pending
+                                    </option>
+                                    <option value="1" {% if task.completed %}selected{% endif %}>
+                                        <i class="bi bi-check-circle"></i> Completed
+                                    </option>
+                                </select>
+                                <div class="form-text">
+                                    Update the current status of your task
+                                </div>
+                            </div>
+                            {% else %}
+                            <!-- For new tasks, show as checkbox -->
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="checkbox" 
+                                           id="completed" 
+                                           name="completed">
+                                    <label class="form-check-label" for="completed">
+                                        <i class="bi bi-check-square me-2"></i>
+                                        Mark as completed
+                                    </label>
+                                </div>
+                                <div class="form-text">
+                                    Check this if the task is already completed
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Form Buttons -->
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <a href="{% url 'task_list' %}" 
+                                   class="btn btn-secondary btn-custom me-md-2">
+                                    <i class="bi bi-x-circle me-2"></i>
+                                    Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-custom">
+                                    <i class="bi bi-{% if task %}check-circle{% else %}save{% endif %} me-2"></i>
+                                    {% if task %}Update Task{% else %}Save Task{% endif %}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Additional Help Text -->
+                <div class="text-center mt-4">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Fields marked with * are required
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // Form validation and enhancement
+        (function() {
+            'use strict';
+            
+            // Add form validation
+            const form = document.querySelector('form');
+            
+            form.addEventListener('submit', function(event) {
+                const title = document.getElementById('title').value.trim();
+                
+                if (!title) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    // Highlight the title field
+                    const titleField = document.getElementById('title');
+                    titleField.classList.add('is-invalid');
+                    
+                    // Focus on the title field
+                    titleField.focus();
+                    
+                    // Show error message
+                    let errorDiv = titleField.parentNode.querySelector('.invalid-feedback');
+                    if (!errorDiv) {
+                        errorDiv = document.createElement('div');
+                        errorDiv.className = 'invalid-feedback';
+                        errorDiv.textContent = 'Please provide a valid task title.';
+                        titleField.parentNode.appendChild(errorDiv);
+                    }
+                } else {
+                    // Remove error styling if validation passes
+                    document.getElementById('title').classList.remove('is-invalid');
+                    const errorDiv = document.querySelector('.invalid-feedback');
+                    if (errorDiv) {
+                        errorDiv.remove();
+                    }
+                }
+            });
+            
+            // Remove error styling on input
+            document.getElementById('title').addEventListener('input', function() {
+                this.classList.remove('is-invalid');
+                const errorDiv = this.parentNode.querySelector('.invalid-feedback');
+                if (errorDiv) {
+                    errorDiv.remove();
+                }
+            });
+            
+            // Auto-resize textarea
+            const textarea = document.getElementById('description');
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+        })();
+    </script>
+</body>
+</html>
