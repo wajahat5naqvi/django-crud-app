@@ -20,5 +20,5 @@ from tasks.urls import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('task/', include('tasks.urls'))
+    path('', include('tasks.urls'))
 ]
